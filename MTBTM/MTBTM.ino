@@ -203,6 +203,10 @@ void loop() {
   myFile.print(myTime);
   myFile.print(" , ");
 
+  Serial.print("Time, ");
+  Serial.print(myTime);
+  Serial.print(" , ");
+
   if (bno08x.wasReset()) {
     Serial.print("sensor was reset ");
     setReports(reportType, reportIntervalUs);
@@ -232,50 +236,53 @@ if (bno08x.getSensorEvent(&sensorValue)) {
     long now = micros();
     myTime = millis();
     // Serial.print(now - last);             Serial.print("\t <= deltaT ");
-    Serial.print(",Time, "); Serial.print(myTime);  Serial.print(",");                  
-    
+    //Serial.print(",Time, "); Serial.print(myTime);  Serial.print(",");                  
+    delay(50);
     myFile.print("\t ypr, ");  
     myFile.print(ypr.yaw);                myFile.print("\t, ");
     myFile.print(ypr.pitch);              myFile.print("\t, ");
     myFile.print(ypr.roll);             myFile.print("\t,");
-
+    myFile.print(sensorValue.status);   myFile.print("\t, ");
+    delay(50);
     Serial.print("\t ypr, ");  
     Serial.print(ypr.yaw);                Serial.print("\t, ");
     Serial.print(ypr.pitch);              Serial.print("\t, ");
     Serial.print(ypr.roll);             Serial.print("\t, ");
     // last = now;
-    Serial.println(sensorValue.status);  // This is accuracy in the range of 0 to 3
+    Serial.print(sensorValue.status);   Serial.print("\t, "); // This is accuracy in the range of 0 to 3
   }
 
    if (! bmp.performReading()) {
     Serial.println("Failed to perform reading :(");
     return;
   }
-  Serial.print(",Time, "); Serial.print(myTime); Serial.print(" , ");
+  //Serial.print("Time, "); Serial.print(myTime); Serial.print(" , ");
 
   myFile.print("\t Temp, ");
   myFile.print(bmp.temperature);
   //myFile.print(" *C,\t");
 
-  myFile.print("Pressure, ");
+  myFile.print(", Pressure, ");
   myFile.print(bmp.pressure / 100.0);
+  myFile.print(", ");
   //myFile.print(" hPa,\t");
 
   myFile.print("Altitude, ");
   myFile.print(bmp.readAltitude(SEALEVELPRESSURE_HPA));
+  myFile.print(", ");
   //myFile.print(" m, ");
 
   Serial.print("\t Temp, ");
   Serial.print(bmp.temperature);
   //Serial.print(" *C,\t");
 
-  Serial.print("Pressure, ");
+  Serial.print(", Pressure, ");
   Serial.print(bmp.pressure / 100.0);
   Serial.print(" hPa,\t");
 
   Serial.print("Altitude, ");
   Serial.print(bmp.readAltitude(SEALEVELPRESSURE_HPA));
-  //Serial.print(" m, ");
+  Serial.print(" , ");
 
 
   switch (sensorValue.sensorId) {
@@ -346,14 +353,14 @@ case SH2_ROTATION_VECTOR:
     break;
 
   case SH2_ACCELEROMETER:
-    myFile.print("\t Accelerometer xyz: ");
+    myFile.print("\t Accelerometer xyz, ");
     myFile.print(sensorValue.un.accelerometer.x);
     myFile.print(", ");
     myFile.print(sensorValue.un.accelerometer.y);
     myFile.print(", ");
     myFile.print(sensorValue.un.accelerometer.z);
 
-    Serial.print("\t Accelerometer xyz: ");
+    Serial.print("\t Accelerometer xyz, ");
     Serial.print(sensorValue.un.accelerometer.x);
     Serial.print(", ");
     Serial.print(sensorValue.un.accelerometer.y);
@@ -378,7 +385,7 @@ case SH2_ROTATION_VECTOR:
     Serial.print(", ");
     Serial.print(sensorValue.un.linearAcceleration.y);
     Serial.print(", ");
-    Serial.println(sensorValue.un.linearAcceleration.z);
+    Serial.print(sensorValue.un.linearAcceleration.z);
     break;
  
   }
@@ -391,7 +398,7 @@ case SH2_ROTATION_VECTOR:
     myFile.write("\n");
     myFile.close();
     // print to the serial port too:
-    // Serial.println(dataString);
+    Serial.println("\n");
   }
   // if the file isn't open, pop up an error:
   else {
