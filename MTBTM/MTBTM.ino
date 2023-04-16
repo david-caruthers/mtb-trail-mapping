@@ -218,6 +218,65 @@ void loop() {
   //    half_revolutions = 0;
   //    Serial.println(rpm,DEC);
   //  }
+if (bno08x.getSensorEvent(&sensorValue)) {
+    // in this demo only one report type will be received depending on FAST_MODE define (above)
+    switch (sensorValue.sensorId) {
+      case SH2_ARVR_STABILIZED_RV:
+        quaternionToEulerRV(&sensorValue.un.arvrStabilizedRV, &ypr, true);
+      case SH2_GYRO_INTEGRATED_RV:
+        // faster (more noise?)
+        quaternionToEulerGI(&sensorValue.un.gyroIntegratedRV, &ypr, true);
+        break;
+    }
+    static long last = 0;
+    long now = micros();
+    myTime = millis();
+    // Serial.print(now - last);             Serial.print("\t <= deltaT ");
+    Serial.print(",Time, "); Serial.print(myTime);  Serial.print(",");                  
+    
+    myFile.print("\t ypr, ");  
+    myFile.print(ypr.yaw);                myFile.print("\t, ");
+    myFile.print(ypr.pitch);              myFile.print("\t, ");
+    myFile.print(ypr.roll);             myFile.print("\t,");
+
+    Serial.print("\t ypr, ");  
+    Serial.print(ypr.yaw);                Serial.print("\t, ");
+    Serial.print(ypr.pitch);              Serial.print("\t, ");
+    Serial.print(ypr.roll);             Serial.print("\t, ");
+    // last = now;
+    Serial.println(sensorValue.status);  // This is accuracy in the range of 0 to 3
+  }
+
+   if (! bmp.performReading()) {
+    Serial.println("Failed to perform reading :(");
+    return;
+  }
+  Serial.print(",Time, "); Serial.print(myTime); Serial.print(" , ");
+
+  myFile.print("\t Temp, ");
+  myFile.print(bmp.temperature);
+  //myFile.print(" *C,\t");
+
+  myFile.print("Pressure, ");
+  myFile.print(bmp.pressure / 100.0);
+  //myFile.print(" hPa,\t");
+
+  myFile.print("Altitude, ");
+  myFile.print(bmp.readAltitude(SEALEVELPRESSURE_HPA));
+  //myFile.print(" m, ");
+
+  Serial.print("\t Temp, ");
+  Serial.print(bmp.temperature);
+  //Serial.print(" *C,\t");
+
+  Serial.print("Pressure, ");
+  Serial.print(bmp.pressure / 100.0);
+  Serial.print(" hPa,\t");
+
+  Serial.print("Altitude, ");
+  Serial.print(bmp.readAltitude(SEALEVELPRESSURE_HPA));
+  //Serial.print(" m, ");
+
 
   switch (sensorValue.sensorId) {
 
@@ -323,64 +382,7 @@ case SH2_ROTATION_VECTOR:
     break;
  
   }
-if (bno08x.getSensorEvent(&sensorValue)) {
-    // in this demo only one report type will be received depending on FAST_MODE define (above)
-    switch (sensorValue.sensorId) {
-      case SH2_ARVR_STABILIZED_RV:
-        quaternionToEulerRV(&sensorValue.un.arvrStabilizedRV, &ypr, true);
-      case SH2_GYRO_INTEGRATED_RV:
-        // faster (more noise?)
-        quaternionToEulerGI(&sensorValue.un.gyroIntegratedRV, &ypr, true);
-        break;
-    }
-    static long last = 0;
-    long now = micros();
-    myTime = millis();
-    // Serial.print(now - last);             Serial.print("\t <= deltaT ");
-    Serial.print(",Time, "); Serial.print(myTime);  Serial.print(",");                  
-    
-    myFile.print("\t ypr, ");  
-    myFile.print(ypr.yaw);                myFile.print("\t, ");
-    myFile.print(ypr.pitch);              myFile.print("\t, ");
-    myFile.print(ypr.roll);             myFile.print("\t,");
 
-    Serial.print("\t ypr, ");  
-    Serial.print(ypr.yaw);                Serial.print("\t, ");
-    Serial.print(ypr.pitch);              Serial.print("\t, ");
-    Serial.print(ypr.roll);             Serial.print("\t, ");
-    // last = now;
-    Serial.println(sensorValue.status);  // This is accuracy in the range of 0 to 3
-  }
-
-   if (! bmp.performReading()) {
-    Serial.println("Failed to perform reading :(");
-    return;
-  }
-  Serial.print(",Time, "); Serial.print(myTime); Serial.print(" , ");
-
-  myFile.print("\t Temp, ");
-  myFile.print(bmp.temperature);
-  myFile.print(" *C,\t");
-
-  myFile.print("Pressure, ");
-  myFile.print(bmp.pressure / 100.0);
-  myFile.print(" hPa,\t");
-
-  myFile.print("Altitude, ");
-  myFile.print(bmp.readAltitude(SEALEVELPRESSURE_HPA));
-  myFile.print(" m, ");
-
-  Serial.print("\t Temp, ");
-  Serial.print(bmp.temperature);
-  Serial.print(" *C,\t");
-
-  Serial.print("Pressure, ");
-  Serial.print(bmp.pressure / 100.0);
-  Serial.print(" hPa,\t");
-
-  Serial.print("Altitude, ");
-  Serial.print(bmp.readAltitude(SEALEVELPRESSURE_HPA));
-  Serial.print(" m, ");
 
 
   // if the file is available, write to it:
