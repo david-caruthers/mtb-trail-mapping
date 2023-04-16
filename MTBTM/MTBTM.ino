@@ -190,7 +190,7 @@ void quaternionToEulerGI(sh2_GyroIntegratedRV_t* rotational_vector, euler_t* ypr
 void loop() {
 
   //add button conditional for start of data logging. should this be in setup? or just use as trigger?
-  delay(100);
+  delay(200);
 
   // make a string for assembling the data to log:
   //String dataString = "";
@@ -199,8 +199,9 @@ void loop() {
   // so you have to close this one before opening another.
   myFile = SD.open(filename, FILE_WRITE);
   myTime = millis();
-  myFile.print("Time: ");
+  myFile.print("Time, ");
   myFile.print(myTime);
+  myFile.print(" , ");
 
   if (bno08x.wasReset()) {
     Serial.print("sensor was reset ");
@@ -265,7 +266,7 @@ case SH2_MAGNETIC_FIELD_CALIBRATED:
 
 case SH2_ROTATION_VECTOR:
     
-    myFile.print("RotationVector rijk, ");
+    myFile.print("\tRotationVector rijk, ");
     myFile.print(sensorValue.un.rotationVector.real);
     myFile.print(" , ");
     myFile.print(sensorValue.un.rotationVector.i);
@@ -274,7 +275,7 @@ case SH2_ROTATION_VECTOR:
     myFile.print(" , ");
     myFile.print(sensorValue.un.rotationVector.k);
     
-    Serial.print("RotationVector rijk, ");
+    Serial.print("\tRotationVector rijk, ");
     Serial.print(sensorValue.un.rotationVector.real);
     Serial.print(" , ");
     Serial.print(sensorValue.un.rotationVector.i);
@@ -336,7 +337,7 @@ if (bno08x.getSensorEvent(&sensorValue)) {
     long now = micros();
     myTime = millis();
     // Serial.print(now - last);             Serial.print("\t <= deltaT ");
-    Serial.print("Time: "); Serial.print(myTime);                    
+    Serial.print(",Time, "); Serial.print(myTime);  Serial.print(",");                  
     
     myFile.print("\t ypr, ");  
     myFile.print(ypr.yaw);                myFile.print("\t, ");
@@ -355,7 +356,7 @@ if (bno08x.getSensorEvent(&sensorValue)) {
     Serial.println("Failed to perform reading :(");
     return;
   }
-  Serial.print("Time: "); Serial.print(myTime); 
+  Serial.print(",Time, "); Serial.print(myTime); Serial.print(" , ");
 
   myFile.print("\t Temp, ");
   myFile.print(bmp.temperature);
