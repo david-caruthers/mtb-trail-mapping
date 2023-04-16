@@ -39,6 +39,8 @@ File myFile;
 char filename[] = "gudstuff.txt"; // filename (without extension) should not exceed 8 chars
 const int chipSelect = 53;
 
+//SD.exists() function? 
+
 
 unsigned long myTime;
 
@@ -55,7 +57,7 @@ struct euler_t {
 #ifdef FAST_MODE
   // Top frequency is reported to be 1000Hz (but freq is somewhat variable)
   sh2_SensorId_t reportType = SH2_GYRO_INTEGRATED_RV;
-  long reportIntervalUs = 2000;
+  long reportIntervalUs = 2000; 
 #else
   // Top frequency is about 250Hz but this report is more accurate
   sh2_SensorId_t reportType = SH2_ARVR_STABILIZED_RV;
@@ -133,19 +135,19 @@ void setup(void) {
 void setReports(sh2_SensorId_t reportType, long report_interval) {
   Serial.println("Setting desired reports");
  
-  if (!bno08x.enableReport(SH2_ACCELEROMETER)) {
+  if (!bno08x.enableReport(SH2_ACCELEROMETER,2500)) {
     Serial.println("Could not enable accelerometer");
   }
-  if (!bno08x.enableReport(SH2_GYROSCOPE_CALIBRATED)) {
-    Serial.println("Could not enable gyroscope");
-  }
-  if (!bno08x.enableReport(SH2_MAGNETIC_FIELD_CALIBRATED)) {
-    Serial.println("Could not enable magnetic field calibrated");
-  }
-  if (!bno08x.enableReport(SH2_LINEAR_ACCELERATION)) {
+  // if (!bno08x.enableReport(SH2_GYROSCOPE_CALIBRATED,report_interval)) {
+  //   Serial.println("Could not enable gyroscope");
+  // }
+  // if (!bno08x.enableReport(SH2_MAGNETIC_FIELD_CALIBRATED)) {
+  //   Serial.println("Could not enable magnetic field calibrated");
+  // }
+  if (!bno08x.enableReport(SH2_LINEAR_ACCELERATION,2500)) {
     Serial.println("Could not enable linear acceleration");
   }
-  if (!bno08x.enableReport(SH2_ROTATION_VECTOR)) {
+  if (!bno08x.enableReport(SH2_ROTATION_VECTOR,2500)) {
     Serial.println("Could not enable rotation vector");
   }
    if (! bno08x.enableReport(reportType, report_interval)) {
@@ -190,7 +192,7 @@ void quaternionToEulerGI(sh2_GyroIntegratedRV_t* rotational_vector, euler_t* ypr
 void loop() {
 
   //add button conditional for start of data logging. should this be in setup? or just use as trigger?
-  delay(200);
+  //delay(10);
 
   // make a string for assembling the data to log:
   //String dataString = "";
@@ -203,9 +205,9 @@ void loop() {
   myFile.print(myTime);
   myFile.print(" , ");
 
-  Serial.print("Time, ");
-  Serial.print(myTime);
-  Serial.print(" , ");
+  // Serial.print("Time, ");
+  // Serial.print(myTime);
+  // Serial.print(" , ");
 
   if (bno08x.wasReset()) {
     Serial.print("sensor was reset ");
@@ -237,19 +239,19 @@ if (bno08x.getSensorEvent(&sensorValue)) {
     myTime = millis();
     // Serial.print(now - last);             Serial.print("\t <= deltaT ");
     //Serial.print(",Time, "); Serial.print(myTime);  Serial.print(",");                  
-    delay(50);
+    
     myFile.print("\t ypr, ");  
     myFile.print(ypr.yaw);                myFile.print("\t, ");
     myFile.print(ypr.pitch);              myFile.print("\t, ");
     myFile.print(ypr.roll);             myFile.print("\t,");
     myFile.print(sensorValue.status);   myFile.print("\t, ");
-    delay(50);
-    Serial.print("\t ypr, ");  
-    Serial.print(ypr.yaw);                Serial.print("\t, ");
-    Serial.print(ypr.pitch);              Serial.print("\t, ");
-    Serial.print(ypr.roll);             Serial.print("\t, ");
-    // last = now;
-    Serial.print(sensorValue.status);   Serial.print("\t, "); // This is accuracy in the range of 0 to 3
+    
+    // Serial.print("\t ypr, ");  
+    // Serial.print(ypr.yaw);                Serial.print("\t, ");
+    // Serial.print(ypr.pitch);              Serial.print("\t, ");
+    // Serial.print(ypr.roll);             Serial.print("\t, ");
+    // // last = now;
+    // Serial.print(sensorValue.status);   Serial.print("\t, "); // This is accuracy in the range of 0 to 3
   }
 
    if (! bmp.performReading()) {
@@ -272,65 +274,24 @@ if (bno08x.getSensorEvent(&sensorValue)) {
   myFile.print(", ");
   //myFile.print(" m, ");
 
-  Serial.print("\t Temp, ");
-  Serial.print(bmp.temperature);
-  //Serial.print(" *C,\t");
+  // Serial.print("\t Temp, ");
+  // Serial.print(bmp.temperature);
+  // //Serial.print(" *C,\t");
 
-  Serial.print(", Pressure, ");
-  Serial.print(bmp.pressure / 100.0);
-  Serial.print(" hPa,\t");
+  // Serial.print(", Pressure, ");
+  // Serial.print(bmp.pressure / 100.0);
+  // Serial.print(" hPa,\t");
 
-  Serial.print("Altitude, ");
-  Serial.print(bmp.readAltitude(SEALEVELPRESSURE_HPA));
-  Serial.print(" , ");
+  // Serial.print("Altitude, ");
+  // Serial.print(bmp.readAltitude(SEALEVELPRESSURE_HPA));
+  // Serial.print(" , ");
 
 
-  switch (sensorValue.sensorId) {
+//   switch (sensorValue.sensorId) {
 
-case SH2_MAGNETIC_FIELD_CALIBRATED:
-    // myTime = millis();
-    
-    // Serial.print("Time: "); 
-    // Serial.print(myTime);
 
-    myFile.print("\t Magnetic Field xyz, ");
-    myFile.print(sensorValue.un.magneticField.x);
-    myFile.print(" , ");
-    myFile.print(sensorValue.un.magneticField.y);
-    myFile.print(" , ");
-    myFile.print(sensorValue.un.magneticField.z);
 
-    Serial.print("\t Magnetic Field xyz, ");
-    Serial.print(sensorValue.un.magneticField.x);
-    Serial.print(", ");
-    Serial.print(sensorValue.un.magneticField.y);
-    Serial.print(", ");
-    Serial.print(sensorValue.un.magneticField.z);
-    break;
-
-  case SH2_GYROSCOPE_CALIBRATED:
-    // myTime = millis();
-    // Serial.print("Time, "); 
-    // Serial.print(myTime);
-    
-    myFile.print("\t Gyro xyz, ");
-    myFile.print(sensorValue.un.gyroscope.x);
-    myFile.print(" ,  ");
-    myFile.print(sensorValue.un.gyroscope.y);
-    myFile.print(" ,  ");
-    myFile.print(sensorValue.un.gyroscope.z);
-    
-
-    Serial.print("\t Gyro xyz, ");
-    Serial.print(sensorValue.un.gyroscope.x);
-    Serial.print(", ");
-    Serial.print(sensorValue.un.gyroscope.y);
-    Serial.print(", ");
-    Serial.print(sensorValue.un.gyroscope.z);
-    
-    break;
-
-case SH2_ROTATION_VECTOR:
+// case SH2_ROTATION_VECTOR:
     
     myFile.print("\tRotationVector rijk, ");
     myFile.print(sensorValue.un.rotationVector.real);
@@ -341,54 +302,54 @@ case SH2_ROTATION_VECTOR:
     myFile.print(" , ");
     myFile.print(sensorValue.un.rotationVector.k);
     
-    Serial.print("\tRotationVector rijk, ");
-    Serial.print(sensorValue.un.rotationVector.real);
-    Serial.print(" , ");
-    Serial.print(sensorValue.un.rotationVector.i);
-    Serial.print(" , ");
-    Serial.print(sensorValue.un.rotationVector.j);
-    Serial.print(" , ");
-    Serial.print(sensorValue.un.rotationVector.k);
+    // Serial.print("\tRotationVector rijk, ");
+    // Serial.print(sensorValue.un.rotationVector.real);
+    // Serial.print(" , ");
+    // Serial.print(sensorValue.un.rotationVector.i);
+    // Serial.print(" , ");
+    // Serial.print(sensorValue.un.rotationVector.j);
+    // Serial.print(" , ");
+    // Serial.print(sensorValue.un.rotationVector.k);
     
-    break;
+  //   break;
 
-  case SH2_ACCELEROMETER:
-    myFile.print("\t Accelerometer xyz, ");
+  // case SH2_ACCELEROMETER:
+    myFile.print("\tAccelerometer xyz, ");
     myFile.print(sensorValue.un.accelerometer.x);
     myFile.print(", ");
     myFile.print(sensorValue.un.accelerometer.y);
     myFile.print(", ");
     myFile.print(sensorValue.un.accelerometer.z);
 
-    Serial.print("\t Accelerometer xyz, ");
-    Serial.print(sensorValue.un.accelerometer.x);
-    Serial.print(", ");
-    Serial.print(sensorValue.un.accelerometer.y);
-    Serial.print(", ");
-    Serial.print(sensorValue.un.accelerometer.z);
-    break; 
+    // Serial.print("\t Accelerometer xyz, ");
+    // Serial.print(sensorValue.un.accelerometer.x);
+    // Serial.print(", ");
+    // Serial.print(sensorValue.un.accelerometer.y);
+    // Serial.print(", ");
+    // Serial.print(sensorValue.un.accelerometer.z);
+  //   break; 
 
-  case SH2_LINEAR_ACCELERATION:
+  // case SH2_LINEAR_ACCELERATION:
     // myTime = millis();
     // Serial.print("Time: "); 
     // Serial.print(myTime); 
 
-    myFile.print("\t LinearAccel xyz, ");
+    myFile.print("\tLinearAccel xyz, ");
     myFile.print(sensorValue.un.linearAcceleration.x);
     myFile.print(", ");
     myFile.print(sensorValue.un.linearAcceleration.y);
     myFile.print(", ");
     myFile.print(sensorValue.un.linearAcceleration.z);
 
-    Serial.print("\t LinearAccel xyz, ");
-    Serial.print(sensorValue.un.linearAcceleration.x);
-    Serial.print(", ");
-    Serial.print(sensorValue.un.linearAcceleration.y);
-    Serial.print(", ");
-    Serial.print(sensorValue.un.linearAcceleration.z);
-    break;
+    // Serial.print("\t LinearAccel xyz, ");
+    // Serial.print(sensorValue.un.linearAcceleration.x);
+    // Serial.print(", ");
+    // Serial.print(sensorValue.un.linearAcceleration.y);
+    // Serial.print(", ");
+    // Serial.print(sensorValue.un.linearAcceleration.z);
+  //   break;
  
-  }
+  // }
 
 
 
