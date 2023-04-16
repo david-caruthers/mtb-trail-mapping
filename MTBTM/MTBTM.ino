@@ -231,14 +231,14 @@ case SH2_MAGNETIC_FIELD_CALIBRATED:
     myFile.print(" , ");
     myFile.print(sensorValue.un.magneticField.y);
     myFile.print(" , ");
-    myFile.println(sensorValue.un.magneticField.z);
+    myFile.print(sensorValue.un.magneticField.z);
 
     Serial.print("\t Magnetic Field xyz, ");
     Serial.print(sensorValue.un.magneticField.x);
     Serial.print(", ");
     Serial.print(sensorValue.un.magneticField.y);
     Serial.print(", ");
-    Serial.println(sensorValue.un.magneticField.z);
+    Serial.print(sensorValue.un.magneticField.z);
     break;
 
   case SH2_GYROSCOPE_CALIBRATED:
@@ -259,7 +259,7 @@ case SH2_MAGNETIC_FIELD_CALIBRATED:
     Serial.print(", ");
     Serial.print(sensorValue.un.gyroscope.y);
     Serial.print(", ");
-    Serial.println(sensorValue.un.gyroscope.z);
+    Serial.print(sensorValue.un.gyroscope.z);
     
     break;
 
@@ -272,7 +272,7 @@ case SH2_ROTATION_VECTOR:
     myFile.print(" , ");
     myFile.print(sensorValue.un.rotationVector.j);
     myFile.print(" , ");
-    myFile.println(sensorValue.un.rotationVector.k);
+    myFile.print(sensorValue.un.rotationVector.k);
     
     Serial.print("RotationVector rijk, ");
     Serial.print(sensorValue.un.rotationVector.real);
@@ -281,7 +281,7 @@ case SH2_ROTATION_VECTOR:
     Serial.print(" , ");
     Serial.print(sensorValue.un.rotationVector.j);
     Serial.print(" , ");
-    Serial.println(sensorValue.un.rotationVector.k);
+    Serial.print(sensorValue.un.rotationVector.k);
     
     break;
 
@@ -291,14 +291,14 @@ case SH2_ROTATION_VECTOR:
     myFile.print(", ");
     myFile.print(sensorValue.un.accelerometer.y);
     myFile.print(", ");
-    myFile.println(sensorValue.un.accelerometer.z);
+    myFile.print(sensorValue.un.accelerometer.z);
 
     Serial.print("\t Accelerometer xyz: ");
     Serial.print(sensorValue.un.accelerometer.x);
     Serial.print(", ");
     Serial.print(sensorValue.un.accelerometer.y);
     Serial.print(", ");
-    Serial.println(sensorValue.un.accelerometer.z);
+    Serial.print(sensorValue.un.accelerometer.z);
     break; 
 
   case SH2_LINEAR_ACCELERATION:
@@ -381,7 +381,6 @@ if (bno08x.getSensorEvent(&sensorValue)) {
   Serial.print(bmp.readAltitude(SEALEVELPRESSURE_HPA));
   Serial.print(" m, ");
 
-  Serial.println();
 
   // if the file is available, write to it:
   if (myFile) {
