@@ -144,10 +144,10 @@ void setReports(sh2_SensorId_t reportType, long report_interval) {
   // if (!bno08x.enableReport(SH2_MAGNETIC_FIELD_CALIBRATED)) {
   //   Serial.println("Could not enable magnetic field calibrated");
   // }
-  if (!bno08x.enableReport(SH2_LINEAR_ACCELERATION,3000)) {
+  if (!bno08x.enableReport(SH2_LINEAR_ACCELERATION,2000)) {
     Serial.println("Could not enable linear acceleration");
   }
-  if (!bno08x.enableReport(SH2_ROTATION_VECTOR,3000)) {
+  if (!bno08x.enableReport(SH2_ROTATION_VECTOR,2000)) {
     Serial.println("Could not enable rotation vector");
   }
    if (! bno08x.enableReport(reportType, report_interval)) {
@@ -217,44 +217,8 @@ void loop() {
   if (!bno08x.getSensorEvent(&sensorValue)) {
     return;
   }
-  //  //HES
-  // if (half_revolutions >= 20) { 
-  //    rpm = 30*1000/(millis() - timeold)*half_revolutions;
-  //    timeold = millis();
-  //    half_revolutions = 0;
-  //    Serial.println(rpm,DEC);
-  //  }
-if (bno08x.getSensorEvent(&sensorValue)) {
-    // in this demo only one report type will be received depending on FAST_MODE define (above)
-    switch (sensorValue.sensorId) {
-      case SH2_ARVR_STABILIZED_RV:
-        quaternionToEulerRV(&sensorValue.un.arvrStabilizedRV, &ypr, true);
-      case SH2_GYRO_INTEGRATED_RV:
-        // faster (more noise?)
-        quaternionToEulerGI(&sensorValue.un.gyroIntegratedRV, &ypr, true);
-        break;
-    }
-    static long last = 0;
-    long now = micros();
-    myTime = millis();
-    // Serial.print(now - last);             Serial.print("\t <= deltaT ");
-    //Serial.print(",Time, "); Serial.print(myTime);  Serial.print(",");                  
-    
-    myFile.print("\t ypr, ");  
-    myFile.print(ypr.yaw);                myFile.print("\t, ");
-    myFile.print(ypr.pitch);              myFile.print("\t, ");
-    myFile.print(ypr.roll);             myFile.print("\t,");
-    myFile.print(sensorValue.status);   myFile.print("\t, ");
-    
-    // Serial.print("\t ypr, ");  
-    // Serial.print(ypr.yaw);                Serial.print("\t, ");
-    // Serial.print(ypr.pitch);              Serial.print("\t, ");
-    // Serial.print(ypr.roll);             Serial.print("\t, ");
-    // // last = now;
-    // Serial.print(sensorValue.status);   Serial.print("\t, "); // This is accuracy in the range of 0 to 3
-  }
 
-   if (! bmp.performReading()) {
+     if (! bmp.performReading()) {
     Serial.println("Failed to perform reading :(");
     return;
   }
@@ -269,7 +233,7 @@ if (bno08x.getSensorEvent(&sensorValue)) {
   myFile.print(", ");
   //myFile.print(" hPa,\t");
 
-  myFile.print("Altitude, ");
+  myFile.print("Alt, ");
   myFile.print(bmp.readAltitude(SEALEVELPRESSURE_HPA));
   myFile.print(", ");
   //myFile.print(" m, ");
@@ -287,13 +251,55 @@ if (bno08x.getSensorEvent(&sensorValue)) {
   // Serial.print(" , ");
 
 
+
+  //  //HES
+  // if (half_revolutions >= 20) { 
+  //    rpm = 30*1000/(millis() - timeold)*half_revolutions;
+  //    timeold = millis();
+  //    half_revolutions = 0;
+  //    Serial.println(rpm,DEC);
+  //  }
+if (bno08x.getSensorEvent(&sensorValue)) {
+    // in this demo only one report type will be received depending on FAST_MODE define (above)
+    switch (sensorValue.sensorId) {
+      
+      case SH2_ARVR_STABILIZED_RV:
+        quaternionToEulerRV(&sensorValue.un.arvrStabilizedRV, &ypr, true);
+      case SH2_GYRO_INTEGRATED_RV:
+        // faster (more noise?)
+        quaternionToEulerGI(&sensorValue.un.gyroIntegratedRV, &ypr, true);
+        break;
+      case SH2_ROTATION_VECTOR:
+        break;
+      case SH2_LINEAR_ACCELERATION:
+        break;
+     }
+  //   static long last = 0;
+  //   long now = micros();
+  //   myTime = millis();
+  //   // Serial.print(now - last);             Serial.print("\t <= deltaT ");
+  //   //Serial.print(",Time, "); Serial.print(myTime);  Serial.print(",");                  
+    
+  //   myFile.print("\t ypr, ");  
+  //   myFile.print(ypr.yaw);                myFile.print("\t, ");
+  //   myFile.print(ypr.pitch);              myFile.print("\t, ");
+  //   myFile.print(ypr.roll);             myFile.print("\t,");
+  //   myFile.print(sensorValue.status);   myFile.print("\t, ");
+    
+  //   // Serial.print("\t ypr, ");  
+  //   // Serial.print(ypr.yaw);                Serial.print("\t, ");
+  //   // Serial.print(ypr.pitch);              Serial.print("\t, ");
+  //   // Serial.print(ypr.roll);             Serial.print("\t, ");
+  //   // // last = now;
+  //   // Serial.print(sensorValue.status);   Serial.print("\t, "); // This is accuracy in the range of 0 to 3
+   
 //   switch (sensorValue.sensorId) {
 
 
 
 // case SH2_ROTATION_VECTOR:
     
-    myFile.print("\tRotationVector rijk, ");
+    myFile.print("\t rijk, ");
     myFile.print(sensorValue.un.rotationVector.real);
     myFile.print(" , ");
     myFile.print(sensorValue.un.rotationVector.i);
@@ -302,6 +308,7 @@ if (bno08x.getSensorEvent(&sensorValue)) {
     myFile.print(" , ");
     myFile.print(sensorValue.un.rotationVector.k);
     myFile.print(" , ");
+    myFile.print(sensorValue.status);   myFile.print(" , ");
     
     // Serial.print("\tRotationVector rijk, ");
     // Serial.print(sensorValue.un.rotationVector.real);
@@ -312,7 +319,7 @@ if (bno08x.getSensorEvent(&sensorValue)) {
     // Serial.print(" , ");
     // Serial.print(sensorValue.un.rotationVector.k);
     
-  //   break;
+    // break;
 
   // case SH2_ACCELEROMETER:
     // myFile.print("\tAccelerometer xyz, ");
@@ -329,20 +336,21 @@ if (bno08x.getSensorEvent(&sensorValue)) {
     // Serial.print(sensorValue.un.accelerometer.y);
     // Serial.print(", ");
     // Serial.print(sensorValue.un.accelerometer.z);
-  //   break; 
+    // break; 
 
   // case SH2_LINEAR_ACCELERATION:
     // myTime = millis();
     // Serial.print("Time: "); 
     // Serial.print(myTime); 
 
-    myFile.print("\tLinearAccel xyz, ");
+    myFile.print(" LAccel xyz, ");
     myFile.print(sensorValue.un.linearAcceleration.x);
     myFile.print(", ");
     myFile.print(sensorValue.un.linearAcceleration.y);
     myFile.print(", ");
     myFile.print(sensorValue.un.linearAcceleration.z);
     myFile.print(" , ");
+    myFile.print(sensorValue.status);   myFile.print(" , ");
     // Serial.print("\t LinearAccel xyz, ");
     // Serial.print(sensorValue.un.linearAcceleration.x);
     // Serial.print(", ");
@@ -352,6 +360,12 @@ if (bno08x.getSensorEvent(&sensorValue)) {
   //   break;
  
   // }
+
+   
+   }
+
+
+
 
 
 
