@@ -150,9 +150,9 @@ void setReports(sh2_SensorId_t reportType, long report_interval) {
   if (!bno08x.enableReport(SH2_ROTATION_VECTOR,2000)) {
     Serial.println("Could not enable rotation vector");
   }
-   if (! bno08x.enableReport(reportType, report_interval)) {
-    Serial.println("Could not enable stabilized remote vector");
-  }
+  //  if (! bno08x.enableReport(reportType, report_interval)) {
+  //   Serial.println("Could not enable stabilized remote vector");
+  // }
  
 }
 // //HES
@@ -195,6 +195,7 @@ void loop() {
   //delay(10);
 
   // make a string for assembling the data to log:
+  //char dataString[300] = "";
   //String dataString = "";
 
   // open the file. note that only one file can be open at a time,
@@ -205,6 +206,9 @@ void loop() {
   myFile.print(myTime);
   myFile.print(" , ");
 
+  // char currtime[50] = "";;
+  // snprintf(currtime, sizeof(currtime),"Time, %lu, ", myTime);
+  // strcat(dataString,currtime);
   // Serial.print("Time, ");
   // Serial.print(myTime);
   // Serial.print(" , ");
@@ -222,24 +226,27 @@ void loop() {
     Serial.println("Failed to perform reading :(");
     return;
   }
-  //Serial.print("Time, "); Serial.print(myTime); Serial.print(" , ");
+  // //Serial.print("Time, "); Serial.print(myTime); Serial.print(" , ");
 
-  myFile.print("\t Temp, ");
-  myFile.print(bmp.temperature);
-  //myFile.print(" *C,\t");
+// char bmpout[65] = "";
+// snprintf(bmpout, sizeof(bmpout), "\tTemp, %f, Press, %f, Alt, %f,", 
+//          bmp.temperature, bmp.pressure/100, bmp.readAltitude(SEALEVELPRESSURE_HPA));
+// strcat(dataString,bmpout);
 
-  myFile.print(", Pressure, ");
+  myFile.print("\tTemp, ");
+  myFile.print(bmp.temperature); 
+  // //myFile.print(" *C,\t");
+
+  myFile.print(", Press, ");
   myFile.print(bmp.pressure / 100.0);
-  myFile.print(", ");
-  //myFile.print(" hPa,\t");
+  // //myFile.print(" hPa,\t");
 
-  myFile.print("Alt, ");
+  myFile.print(", Alt, ");
   myFile.print(bmp.readAltitude(SEALEVELPRESSURE_HPA));
-  myFile.print(", ");
   //myFile.print(" m, ");
 
-  // Serial.print("\t Temp, ");
-  // Serial.print(bmp.temperature);
+  Serial.print(", Temp, ");
+  Serial.print(bmp.temperature); myFile.print(" , ");
   // //Serial.print(" *C,\t");
 
   // Serial.print(", Pressure, ");
@@ -298,8 +305,12 @@ if (bno08x.getSensorEvent(&sensorValue)) {
 
 
 // case SH2_ROTATION_VECTOR:
-    
-    myFile.print("\t rijk, ");
+//     char rotvect[65] = "";
+// snprintf(rotvect, sizeof(rotvect), "\tRotVect rijk, %f, %f, %f, %f, %f,", 
+//          sensorValue.un.rotationVector.real, sensorValue.un.rotationVector.i, 
+//          sensorValue.un.rotationVector.j, sensorValue.un.rotationVector.k, sensorValue.status);
+//          strcat(dataString,rotvect);
+    myFile.print("\tRotVect rijk, ");
     myFile.print(sensorValue.un.rotationVector.real);
     myFile.print(" , ");
     myFile.print(sensorValue.un.rotationVector.i);
@@ -343,7 +354,7 @@ if (bno08x.getSensorEvent(&sensorValue)) {
     // Serial.print("Time: "); 
     // Serial.print(myTime); 
 
-    myFile.print(" LAccel xyz, ");
+    myFile.print("\tLAccel xyz, ");
     myFile.print(sensorValue.un.linearAcceleration.x);
     myFile.print(", ");
     myFile.print(sensorValue.un.linearAcceleration.y);
@@ -351,12 +362,18 @@ if (bno08x.getSensorEvent(&sensorValue)) {
     myFile.print(sensorValue.un.linearAcceleration.z);
     myFile.print(" , ");
     myFile.print(sensorValue.status);   myFile.print(" , ");
+    // char linacc[65] = "";
+    
+    // snprintf(linacc, sizeof(linacc), "\tLinAcc xyz, %f , %f , %f , %f,", 
+    //      sensorValue.un.linearAcceleration.x, sensorValue.un.linearAcceleration.y, 
+    //     sensorValue.un.linearAcceleration.z, sensorValue.status);
+    //      strcat(dataString,linacc);
     // Serial.print("\t LinearAccel xyz, ");
     // Serial.print(sensorValue.un.linearAcceleration.x);
     // Serial.print(", ");
     // Serial.print(sensorValue.un.linearAcceleration.y);
     // Serial.print(", ");
-    // Serial.print(sensorValue.un.linearAcceleration.z);
+    // Serial.println(sensorValue.un.linearAcceleration.z);
   //   break;
  
   // }
@@ -375,7 +392,8 @@ if (bno08x.getSensorEvent(&sensorValue)) {
     myFile.write("\n");
     myFile.close();
     // print to the serial port too:
-    Serial.println("\n");
+    // Serial.print(dataString);
+    // Serial.println("\n");
   }
   // if the file isn't open, pop up an error:
   else {
