@@ -135,19 +135,19 @@ void setup(void) {
 void setReports(sh2_SensorId_t reportType, long report_interval) {
   Serial.println("Setting desired reports");
  
-  if (!bno08x.enableReport(SH2_ACCELEROMETER,2500)) {
-    Serial.println("Could not enable accelerometer");
-  }
+  // if (!bno08x.enableReport(SH2_ACCELEROMETER,3000)) {
+  //   Serial.println("Could not enable accelerometer");
+  // }
   // if (!bno08x.enableReport(SH2_GYROSCOPE_CALIBRATED,report_interval)) {
   //   Serial.println("Could not enable gyroscope");
   // }
   // if (!bno08x.enableReport(SH2_MAGNETIC_FIELD_CALIBRATED)) {
   //   Serial.println("Could not enable magnetic field calibrated");
   // }
-  if (!bno08x.enableReport(SH2_LINEAR_ACCELERATION,2500)) {
+  if (!bno08x.enableReport(SH2_LINEAR_ACCELERATION,3000)) {
     Serial.println("Could not enable linear acceleration");
   }
-  if (!bno08x.enableReport(SH2_ROTATION_VECTOR,2500)) {
+  if (!bno08x.enableReport(SH2_ROTATION_VECTOR,3000)) {
     Serial.println("Could not enable rotation vector");
   }
    if (! bno08x.enableReport(reportType, report_interval)) {
@@ -301,6 +301,7 @@ if (bno08x.getSensorEvent(&sensorValue)) {
     myFile.print(sensorValue.un.rotationVector.j);
     myFile.print(" , ");
     myFile.print(sensorValue.un.rotationVector.k);
+    myFile.print(" , ");
     
     // Serial.print("\tRotationVector rijk, ");
     // Serial.print(sensorValue.un.rotationVector.real);
@@ -314,12 +315,13 @@ if (bno08x.getSensorEvent(&sensorValue)) {
   //   break;
 
   // case SH2_ACCELEROMETER:
-    myFile.print("\tAccelerometer xyz, ");
-    myFile.print(sensorValue.un.accelerometer.x);
-    myFile.print(", ");
-    myFile.print(sensorValue.un.accelerometer.y);
-    myFile.print(", ");
-    myFile.print(sensorValue.un.accelerometer.z);
+    // myFile.print("\tAccelerometer xyz, ");
+    // myFile.print(sensorValue.un.accelerometer.x);
+    // myFile.print(", ");
+    // myFile.print(sensorValue.un.accelerometer.y);
+    // myFile.print(", ");
+    // myFile.print(sensorValue.un.accelerometer.z);
+    // myFile.print(" , ");
 
     // Serial.print("\t Accelerometer xyz, ");
     // Serial.print(sensorValue.un.accelerometer.x);
@@ -340,7 +342,7 @@ if (bno08x.getSensorEvent(&sensorValue)) {
     myFile.print(sensorValue.un.linearAcceleration.y);
     myFile.print(", ");
     myFile.print(sensorValue.un.linearAcceleration.z);
-
+    myFile.print(" , ");
     // Serial.print("\t LinearAccel xyz, ");
     // Serial.print(sensorValue.un.linearAcceleration.x);
     // Serial.print(", ");
