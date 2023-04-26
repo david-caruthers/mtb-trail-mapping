@@ -195,191 +195,234 @@ void loop() {
   //delay(10);
 
   // make a string for assembling the data to log:
-  //char dataString[300] = "";
-  //String dataString = "";
+  char dataString[280] = "";
+  // String dataString = "";
 
-  // open the file. note that only one file can be open at a time,
-  // so you have to close this one before opening another.
-  myFile = SD.open(filename, FILE_WRITE);
-  myTime = millis();
-  myFile.print("Time, ");
-  myFile.print(myTime);
-  myFile.print(" , ");
-
-  // char currtime[50] = "";;
-  // snprintf(currtime, sizeof(currtime),"Time, %lu, ", myTime);
-  // strcat(dataString,currtime);
-  // Serial.print("Time, ");
-  // Serial.print(myTime);
-  // Serial.print(" , ");
-
-  if (bno08x.wasReset()) {
-    Serial.print("sensor was reset ");
-    setReports(reportType, reportIntervalUs);
-  }
-
-  if (!bno08x.getSensorEvent(&sensorValue)) {
-    return;
-  }
-
-     if (! bmp.performReading()) {
-    Serial.println("Failed to perform reading :(");
-    return;
-  }
-  // //Serial.print("Time, "); Serial.print(myTime); Serial.print(" , ");
-
-// char bmpout[65] = "";
-// snprintf(bmpout, sizeof(bmpout), "\tTemp, %f, Press, %f, Alt, %f,", 
-//          bmp.temperature, bmp.pressure/100, bmp.readAltitude(SEALEVELPRESSURE_HPA));
-// strcat(dataString,bmpout);
-
-  myFile.print("\tTemp, ");
-  myFile.print(bmp.temperature); 
-  // //myFile.print(" *C,\t");
-
-  myFile.print(", Press, ");
-  myFile.print(bmp.pressure / 100.0);
-  // //myFile.print(" hPa,\t");
-
-  myFile.print(", Alt, ");
-  myFile.print(bmp.readAltitude(SEALEVELPRESSURE_HPA));
-  //myFile.print(" m, ");
-
-  Serial.print(", Temp, ");
-  Serial.print(bmp.temperature); myFile.print(" , ");
-  // //Serial.print(" *C,\t");
-
-  // Serial.print(", Pressure, ");
-  // Serial.print(bmp.pressure / 100.0);
-  // Serial.print(" hPa,\t");
-
-  // Serial.print("Altitude, ");
-  // Serial.print(bmp.readAltitude(SEALEVELPRESSURE_HPA));
-  // Serial.print(" , ");
-
-
-
-  //  //HES
-  // if (half_revolutions >= 20) { 
-  //    rpm = 30*1000/(millis() - timeold)*half_revolutions;
-  //    timeold = millis();
-  //    half_revolutions = 0;
-  //    Serial.println(rpm,DEC);
-  //  }
-if (bno08x.getSensorEvent(&sensorValue)) {
-    // in this demo only one report type will be received depending on FAST_MODE define (above)
-    switch (sensorValue.sensorId) {
-      
-      case SH2_ARVR_STABILIZED_RV:
-        quaternionToEulerRV(&sensorValue.un.arvrStabilizedRV, &ypr, true);
-      case SH2_GYRO_INTEGRATED_RV:
-        // faster (more noise?)
-        quaternionToEulerGI(&sensorValue.un.gyroIntegratedRV, &ypr, true);
-        break;
-      case SH2_ROTATION_VECTOR:
-        break;
-      case SH2_LINEAR_ACCELERATION:
-        break;
-     }
-  //   static long last = 0;
-  //   long now = micros();
-  //   myTime = millis();
-  //   // Serial.print(now - last);             Serial.print("\t <= deltaT ");
-  //   //Serial.print(",Time, "); Serial.print(myTime);  Serial.print(",");                  
-    
-  //   myFile.print("\t ypr, ");  
-  //   myFile.print(ypr.yaw);                myFile.print("\t, ");
-  //   myFile.print(ypr.pitch);              myFile.print("\t, ");
-  //   myFile.print(ypr.roll);             myFile.print("\t,");
-  //   myFile.print(sensorValue.status);   myFile.print("\t, ");
-    
-  //   // Serial.print("\t ypr, ");  
-  //   // Serial.print(ypr.yaw);                Serial.print("\t, ");
-  //   // Serial.print(ypr.pitch);              Serial.print("\t, ");
-  //   // Serial.print(ypr.roll);             Serial.print("\t, ");
-  //   // // last = now;
-  //   // Serial.print(sensorValue.status);   Serial.print("\t, "); // This is accuracy in the range of 0 to 3
-   
-//   switch (sensorValue.sensorId) {
-
-
-
-// case SH2_ROTATION_VECTOR:
-//     char rotvect[65] = "";
-// snprintf(rotvect, sizeof(rotvect), "\tRotVect rijk, %f, %f, %f, %f, %f,", 
-//          sensorValue.un.rotationVector.real, sensorValue.un.rotationVector.i, 
-//          sensorValue.un.rotationVector.j, sensorValue.un.rotationVector.k, sensorValue.status);
-//          strcat(dataString,rotvect);
-    myFile.print("\tRotVect rijk, ");
-    myFile.print(sensorValue.un.rotationVector.real);
-    myFile.print(" , ");
-    myFile.print(sensorValue.un.rotationVector.i);
-    myFile.print(" , ");
-    myFile.print(sensorValue.un.rotationVector.j);
-    myFile.print(" , ");
-    myFile.print(sensorValue.un.rotationVector.k);
-    myFile.print(" , ");
-    myFile.print(sensorValue.status);   myFile.print(" , ");
-    
-    // Serial.print("\tRotationVector rijk, ");
-    // Serial.print(sensorValue.un.rotationVector.real);
-    // Serial.print(" , ");
-    // Serial.print(sensorValue.un.rotationVector.i);
-    // Serial.print(" , ");
-    // Serial.print(sensorValue.un.rotationVector.j);
-    // Serial.print(" , ");
-    // Serial.print(sensorValue.un.rotationVector.k);
-    
-    // break;
-
-  // case SH2_ACCELEROMETER:
-    // myFile.print("\tAccelerometer xyz, ");
-    // myFile.print(sensorValue.un.accelerometer.x);
-    // myFile.print(", ");
-    // myFile.print(sensorValue.un.accelerometer.y);
-    // myFile.print(", ");
-    // myFile.print(sensorValue.un.accelerometer.z);
+  for (int i = 0; i < 4; i++) {
+    // open the file. note that only one file can be open at a time,
+    // so you have to close this one before opening another.
+    myFile = SD.open(filename, FILE_WRITE);
+    myTime = millis();
+    // myFile.print("Time, ");
+    // myFile.print(myTime);
     // myFile.print(" , ");
 
-    // Serial.print("\t Accelerometer xyz, ");
-    // Serial.print(sensorValue.un.accelerometer.x);
-    // Serial.print(", ");
-    // Serial.print(sensorValue.un.accelerometer.y);
-    // Serial.print(", ");
-    // Serial.print(sensorValue.un.accelerometer.z);
-    // break; 
+    char currtime[10] = "";
+    snprintf(currtime, sizeof(currtime), "%lu", myTime);
+    strcat(dataString, currtime);
+    strcat(dataString, ",");
+    // Serial.print("Time, ");
+    // Serial.print(myTime);
+    // Serial.print(" , ");
 
-  // case SH2_LINEAR_ACCELERATION:
-    // myTime = millis();
-    // Serial.print("Time: "); 
-    // Serial.print(myTime); 
+    if (bno08x.wasReset()) {
+      Serial.print("sensor was reset ");
+      setReports(reportType, reportIntervalUs);
+    }
 
-    myFile.print("\tLAccel xyz, ");
-    myFile.print(sensorValue.un.linearAcceleration.x);
-    myFile.print(", ");
-    myFile.print(sensorValue.un.linearAcceleration.y);
-    myFile.print(", ");
-    myFile.print(sensorValue.un.linearAcceleration.z);
-    myFile.print(" , ");
-    myFile.print(sensorValue.status);   myFile.print(" , ");
-    // char linacc[65] = "";
-    
-    // snprintf(linacc, sizeof(linacc), "\tLinAcc xyz, %f , %f , %f , %f,", 
-    //      sensorValue.un.linearAcceleration.x, sensorValue.un.linearAcceleration.y, 
-    //     sensorValue.un.linearAcceleration.z, sensorValue.status);
-    //      strcat(dataString,linacc);
-    // Serial.print("\t LinearAccel xyz, ");
-    // Serial.print(sensorValue.un.linearAcceleration.x);
-    // Serial.print(", ");
-    // Serial.print(sensorValue.un.linearAcceleration.y);
-    // Serial.print(", ");
-    // Serial.println(sensorValue.un.linearAcceleration.z);
-  //   break;
- 
-  // }
+    if (!bno08x.getSensorEvent(&sensorValue)) {
+      return;
+    }
 
-   
-   }
+    if (!bmp.performReading()) {
+      Serial.println("Failed to perform reading :(");
+      return;
+    }
+    // //Serial.print("Time, "); Serial.print(myTime); Serial.print(" , ");
+
+    char bmpout[6] = "";
+    dtostrf(bmp.readAltitude(SEALEVELPRESSURE_HPA), 5, 1, bmpout);
+    // snprintf(bmpout, sizeof(bmpout), "\tTemp, %f, Press, %f, Alt, %f,",
+    //          bmp.temperature, bmp.pressure/100, bmp.readAltitude(SEALEVELPRESSURE_HPA));
+    strcat(dataString, bmpout);
+    strcat(dataString, ",");
+
+    // myFile.print("\tTemp, ");
+    // myFile.print(bmp.temperature);
+    // // //myFile.print(" *C,\t");
+
+    // myFile.print(", Press, ");
+    // myFile.print(bmp.pressure / 100.0);
+    // // //myFile.print(" hPa,\t");
+
+    // myFile.print(", Alt, ");
+    // myFile.print(bmp.readAltitude(SEALEVELPRESSURE_HPA));
+    // //myFile.print(" m, ");
+
+    // Serial.print(", Temp, ");
+    // Serial.print(bmp.temperature); myFile.print(" , ");
+    // // //Serial.print(" *C,\t");
+
+    // Serial.print(", Pressure, ");
+    // Serial.print(bmp.pressure / 100.0);
+    // Serial.print(" hPa,\t");
+
+    // Serial.print("Altitude, ");
+    // Serial.print(bmp.readAltitude(SEALEVELPRESSURE_HPA));
+    // Serial.print(" , ");
+
+
+
+    //  //HES
+    // if (half_revolutions >= 20) {
+    //    rpm = 30*1000/(millis() - timeold)*half_revolutions;
+    //    timeold = millis();
+    //    half_revolutions = 0;
+    //    Serial.println(rpm,DEC);
+    //  }
+    if (bno08x.getSensorEvent(&sensorValue)) {
+      // in this demo only one report type will be received depending on FAST_MODE define (above)
+      switch (sensorValue.sensorId) {
+
+        case SH2_ARVR_STABILIZED_RV:
+          quaternionToEulerRV(&sensorValue.un.arvrStabilizedRV, &ypr, true);
+        case SH2_GYRO_INTEGRATED_RV:
+          // faster (more noise?)
+          quaternionToEulerGI(&sensorValue.un.gyroIntegratedRV, &ypr, true);
+          break;
+        case SH2_ROTATION_VECTOR:
+          break;
+        case SH2_LINEAR_ACCELERATION:
+          break;
+      }
+      //   static long last = 0;
+      //   long now = micros();
+      //   myTime = millis();
+      //   // Serial.print(now - last);             Serial.print("\t <= deltaT ");
+      //   //Serial.print(",Time, "); Serial.print(myTime);  Serial.print(",");
+
+      //   myFile.print("\t ypr, ");
+      //   myFile.print(ypr.yaw);                myFile.print("\t, ");
+      //   myFile.print(ypr.pitch);              myFile.print("\t, ");
+      //   myFile.print(ypr.roll);             myFile.print("\t,");
+      //   myFile.print(sensorValue.status);   myFile.print("\t, ");
+
+      //   // Serial.print("\t ypr, ");
+      //   // Serial.print(ypr.yaw);                Serial.print("\t, ");
+      //   // Serial.print(ypr.pitch);              Serial.print("\t, ");
+      //   // Serial.print(ypr.roll);             Serial.print("\t, ");
+      //   // // last = now;
+      //   // Serial.print(sensorValue.status);   Serial.print("\t, "); // This is accuracy in the range of 0 to 3
+
+      //   switch (sensorValue.sensorId) {
+
+
+
+      // case SH2_ROTATION_VECTOR:
+      char rotreal[7] = "";
+      char roti[7] = "";
+      char rotj[7] = "";
+      char rotk[7] = "";
+      char rotstatus[2] = "";
+
+      dtostrf(sensorValue.un.rotationVector.real, 6, 2, rotreal);
+      dtostrf(sensorValue.un.rotationVector.i, 6, 2, roti);
+      dtostrf(sensorValue.un.rotationVector.j, 6, 2, rotj);
+      dtostrf(sensorValue.un.rotationVector.k, 6, 2, rotk);
+      dtostrf(sensorValue.status, 1, 0, rotstatus);
+      // snprintf(rotvect, sizeof(rotvect), "\tRotVect rijk, %f, %f, %f, %f, %f,",
+      //          sensorValue.un.rotationVector.real, sensorValue.un.rotationVector.i,
+      //          sensorValue.un.rotationVector.j, sensorValue.un.rotationVector.k, sensorValue.status);
+      strcat(dataString, rotreal);
+      strcat(dataString, ",");
+      strcat(dataString, roti);
+      strcat(dataString, ",");
+      strcat(dataString, roti);
+      strcat(dataString, ",");
+      strcat(dataString, roti);
+      strcat(dataString, ",");
+      strcat(dataString, rotstatus);
+      strcat(dataString, ",");
+
+
+      // myFile.print("\tRotVect rijk, ");
+      // myFile.print(sensorValue.un.rotationVector.real);
+      // myFile.print(" , ");
+      // myFile.print(sensorValue.un.rotationVector.i);
+      // myFile.print(" , ");
+      // myFile.print(sensorValue.un.rotationVector.j);
+      // myFile.print(" , ");
+      // myFile.print(sensorValue.un.rotationVector.k);
+      // myFile.print(" , ");
+      // myFile.print(sensorValue.status);   myFile.print(" , ");
+
+      // Serial.print("\tRotationVector rijk, ");
+      // Serial.print(sensorValue.un.rotationVector.real);
+      // Serial.print(" , ");
+      // Serial.print(sensorValue.un.rotationVector.i);
+      // Serial.print(" , ");
+      // Serial.print(sensorValue.un.rotationVector.j);
+      // Serial.print(" , ");
+      // Serial.print(sensorValue.un.rotationVector.k);
+
+      // break;
+
+      // case SH2_ACCELEROMETER:
+      // myFile.print("\tAccelerometer xyz, ");
+      // myFile.print(sensorValue.un.accelerometer.x);
+      // myFile.print(", ");
+      // myFile.print(sensorValue.un.accelerometer.y);
+      // myFile.print(", ");
+      // myFile.print(sensorValue.un.accelerometer.z);
+      // myFile.print(" , ");
+
+      // Serial.print("\t Accelerometer xyz, ");
+      // Serial.print(sensorValue.un.accelerometer.x);
+      // Serial.print(", ");
+      // Serial.print(sensorValue.un.accelerometer.y);
+      // Serial.print(", ");
+      // Serial.print(sensorValue.un.accelerometer.z);
+      // break;
+
+      // case SH2_LINEAR_ACCELERATION:
+      // myTime = millis();
+      // Serial.print("Time: ");
+      // Serial.print(myTime);
+
+      // myFile.print("\tLAccel xyz, ");
+      // myFile.print(sensorValue.un.linearAcceleration.x);
+      // myFile.print(", ");
+      // myFile.print(sensorValue.un.linearAcceleration.y);
+      // myFile.print(", ");
+      // myFile.print(sensorValue.un.linearAcceleration.z);
+      // myFile.print(" , ");
+      // myFile.print(sensorValue.status);   myFile.print(" , ");
+
+      char linaccx[7] = "";
+      char linaccy[7] = "";
+      char linaccz[7] = "";
+      char linaccstatus[2] = "";
+
+      dtostrf(sensorValue.un.linearAcceleration.x, 6, 2, linaccx);
+      dtostrf(sensorValue.un.linearAcceleration.y, 6, 2, linaccy);
+      dtostrf(sensorValue.un.linearAcceleration.z, 6, 2, linaccz);
+      dtostrf(sensorValue.status, 1, 0, linaccstatus);
+
+      strcat(dataString, linaccx);
+      strcat(dataString, ",");
+      strcat(dataString, linaccy);
+      strcat(dataString, ",");
+      strcat(dataString, linaccz);
+      strcat(dataString, ",");
+      strcat(dataString, linaccstatus);
+      strcat(dataString, ",");
+
+      // snprintf(linacc, sizeof(linacc), "\tLinAcc xyz, %f , %f , %f , %f,",
+      //      sensorValue.un.linearAcceleration.x, sensorValue.un.linearAcceleration.y,
+      //     sensorValue.un.linearAcceleration.z, sensorValue.status);
+      //      strcat(dataString,linacc);
+      // Serial.print("\t LinearAccel xyz, ");
+      // Serial.print(sensorValue.un.linearAcceleration.x);
+      // Serial.print(", ");
+      // Serial.print(sensorValue.un.linearAcceleration.y);
+      // Serial.print(", ");
+      // Serial.println(sensorValue.un.linearAcceleration.z);
+      //   break;
+
+      // }
+      strcat(dataString, "\n");
+    }
+  }
 
 
 
@@ -388,16 +431,15 @@ if (bno08x.getSensorEvent(&sensorValue)) {
 
   // if the file is available, write to it:
   if (myFile) {
-    // myFile.println(dataString);
-    myFile.write("\n");
+    myFile.println(dataString);
+    //myFile.write("\n");
     myFile.close();
     // print to the serial port too:
-    // Serial.print(dataString);
-    // Serial.println("\n");
+    Serial.println(dataString);
+    //Serial.println("\n");
   }
   // if the file isn't open, pop up an error:
   else {
     Serial1.println("error opening datalog.txt");
   }
-
 }
