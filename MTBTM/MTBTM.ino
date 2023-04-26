@@ -213,19 +213,19 @@ void loop() {
     // Serial.print(myTime);
     // Serial.print(" , ");
 
-    if (bno08x.wasReset()) {
-      Serial.print("sensor was reset ");
-      setReports(reportType, reportIntervalUs);
-    }
+    // if (bno08x.wasReset()) {
+    //   Serial.print("sensor was reset ");
+    //   setReports(reportType, reportIntervalUs);
+    // }
 
-    if (!bno08x.getSensorEvent(&sensorValue)) {
-      return;
-    }
+    // if (!bno08x.getSensorEvent(&sensorValue)) {
+    //   return;
+    // }
 
-    if (!bmp.performReading()) {
-      Serial.println("Failed to perform reading :(");
-      return;
-    }
+    // if (!bmp.performReading()) {
+    //   Serial.println("Failed to perform reading :(");
+    //   return;
+    // }
     // //Serial.print("Time, "); Serial.print(myTime); Serial.print(" , ");
 
     char bmpout[6] = "";
@@ -272,14 +272,14 @@ void loop() {
       // in this demo only one report type will be received depending on FAST_MODE define (above)
       switch (sensorValue.sensorId) {
 
-        case SH2_ARVR_STABILIZED_RV:
-          quaternionToEulerRV(&sensorValue.un.arvrStabilizedRV, &ypr, true);
-        case SH2_GYRO_INTEGRATED_RV:
-          // faster (more noise?)
-          quaternionToEulerGI(&sensorValue.un.gyroIntegratedRV, &ypr, true);
-          break;
-        case SH2_ROTATION_VECTOR:
-          break;
+        // case SH2_ARVR_STABILIZED_RV:
+        //   quaternionToEulerRV(&sensorValue.un.arvrStabilizedRV, &ypr, true);
+        // case SH2_GYRO_INTEGRATED_RV:
+        //   // faster (more noise?)
+        //   quaternionToEulerGI(&sensorValue.un.gyroIntegratedRV, &ypr, true);
+        //   break;
+        // case SH2_ROTATION_VECTOR:
+        //   break;
         case SH2_LINEAR_ACCELERATION:
           break;
       }
@@ -306,18 +306,18 @@ void loop() {
 
 
 
-      // case SH2_ROTATION_VECTOR:
+      // // case SH2_ROTATION_VECTOR:
       char rotreal[7] = "";
       char roti[7] = "";
       char rotj[7] = "";
       char rotk[7] = "";
-      char rotstatus[2] = "";
+      //char rotstatus[2] = "";
 
       dtostrf(sensorValue.un.rotationVector.real, 6, 2, rotreal);
       dtostrf(sensorValue.un.rotationVector.i, 6, 2, roti);
       dtostrf(sensorValue.un.rotationVector.j, 6, 2, rotj);
       dtostrf(sensorValue.un.rotationVector.k, 6, 2, rotk);
-      dtostrf(sensorValue.status, 1, 0, rotstatus);
+      //dtostrf(sensorValue.status, 1, 0, rotstatus);
       // snprintf(rotvect, sizeof(rotvect), "\tRotVect rijk, %f, %f, %f, %f, %f,",
       //          sensorValue.un.rotationVector.real, sensorValue.un.rotationVector.i,
       //          sensorValue.un.rotationVector.j, sensorValue.un.rotationVector.k, sensorValue.status);
@@ -329,62 +329,63 @@ void loop() {
       strcat(dataString, ",");
       strcat(dataString, roti);
       strcat(dataString, ",");
-      strcat(dataString, rotstatus);
-      strcat(dataString, ",");
+      
+      // strcat(dataString, rotstatus);
+      // strcat(dataString, ",");
 
 
-      // myFile.print("\tRotVect rijk, ");
-      // myFile.print(sensorValue.un.rotationVector.real);
-      // myFile.print(" , ");
-      // myFile.print(sensorValue.un.rotationVector.i);
-      // myFile.print(" , ");
-      // myFile.print(sensorValue.un.rotationVector.j);
-      // myFile.print(" , ");
-      // myFile.print(sensorValue.un.rotationVector.k);
-      // myFile.print(" , ");
-      // myFile.print(sensorValue.status);   myFile.print(" , ");
+      // // myFile.print("\tRotVect rijk, ");
+      // // myFile.print(sensorValue.un.rotationVector.real);
+      // // myFile.print(" , ");
+      // // myFile.print(sensorValue.un.rotationVector.i);
+      // // myFile.print(" , ");
+      // // myFile.print(sensorValue.un.rotationVector.j);
+      // // myFile.print(" , ");
+      // // myFile.print(sensorValue.un.rotationVector.k);
+      // // myFile.print(" , ");
+      // // myFile.print(sensorValue.status);   myFile.print(" , ");
 
-      // Serial.print("\tRotationVector rijk, ");
-      // Serial.print(sensorValue.un.rotationVector.real);
-      // Serial.print(" , ");
-      // Serial.print(sensorValue.un.rotationVector.i);
-      // Serial.print(" , ");
-      // Serial.print(sensorValue.un.rotationVector.j);
-      // Serial.print(" , ");
-      // Serial.print(sensorValue.un.rotationVector.k);
+      // // Serial.print("\tRotationVector rijk, ");
+      // // Serial.print(sensorValue.un.rotationVector.real);
+      // // Serial.print(" , ");
+      // // Serial.print(sensorValue.un.rotationVector.i);
+      // // Serial.print(" , ");
+      // // Serial.print(sensorValue.un.rotationVector.j);
+      // // Serial.print(" , ");
+      // // Serial.print(sensorValue.un.rotationVector.k);
 
-      // break;
+      // // break;
 
-      // case SH2_ACCELEROMETER:
-      // myFile.print("\tAccelerometer xyz, ");
-      // myFile.print(sensorValue.un.accelerometer.x);
-      // myFile.print(", ");
-      // myFile.print(sensorValue.un.accelerometer.y);
-      // myFile.print(", ");
-      // myFile.print(sensorValue.un.accelerometer.z);
-      // myFile.print(" , ");
+      // // case SH2_ACCELEROMETER:
+      // // myFile.print("\tAccelerometer xyz, ");
+      // // myFile.print(sensorValue.un.accelerometer.x);
+      // // myFile.print(", ");
+      // // myFile.print(sensorValue.un.accelerometer.y);
+      // // myFile.print(", ");
+      // // myFile.print(sensorValue.un.accelerometer.z);
+      // // myFile.print(" , ");
 
-      // Serial.print("\t Accelerometer xyz, ");
-      // Serial.print(sensorValue.un.accelerometer.x);
-      // Serial.print(", ");
-      // Serial.print(sensorValue.un.accelerometer.y);
-      // Serial.print(", ");
-      // Serial.print(sensorValue.un.accelerometer.z);
-      // break;
+      // // Serial.print("\t Accelerometer xyz, ");
+      // // Serial.print(sensorValue.un.accelerometer.x);
+      // // Serial.print(", ");
+      // // Serial.print(sensorValue.un.accelerometer.y);
+      // // Serial.print(", ");
+      // // Serial.print(sensorValue.un.accelerometer.z);
+      // // break;
 
-      // case SH2_LINEAR_ACCELERATION:
-      // myTime = millis();
-      // Serial.print("Time: ");
-      // Serial.print(myTime);
+      // // case SH2_LINEAR_ACCELERATION:
+      // // myTime = millis();
+      // // Serial.print("Time: ");
+      // // Serial.print(myTime);
 
-      // myFile.print("\tLAccel xyz, ");
-      // myFile.print(sensorValue.un.linearAcceleration.x);
-      // myFile.print(", ");
-      // myFile.print(sensorValue.un.linearAcceleration.y);
-      // myFile.print(", ");
-      // myFile.print(sensorValue.un.linearAcceleration.z);
-      // myFile.print(" , ");
-      // myFile.print(sensorValue.status);   myFile.print(" , ");
+      // // myFile.print("\tLAccel xyz, ");
+      // // myFile.print(sensorValue.un.linearAcceleration.x);
+      // // myFile.print(", ");
+      // // myFile.print(sensorValue.un.linearAcceleration.y);
+      // // myFile.print(", ");
+      // // myFile.print(sensorValue.un.linearAcceleration.z);
+      // // myFile.print(" , ");
+      // // myFile.print(sensorValue.status);   myFile.print(" , ");
 
       char linaccx[7] = "";
       char linaccy[7] = "";
@@ -435,7 +436,7 @@ void loop() {
     //myFile.write("\n");
     myFile.close();
     // print to the serial port too:
-    //Serial.println(dataString);
+    // Serial.println(dataString);
     //Serial.println("\n");
   }
   // if the file isn't open, pop up an error:
