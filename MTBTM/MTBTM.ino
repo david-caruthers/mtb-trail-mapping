@@ -4,8 +4,8 @@
 #include <Adafruit_BNO08x.h>
 
 #include <Arduino.h>
-// This demo explores two reports (SH2_ARVR_STABILIZED_RV and SH2_GYRO_INTEGRATED_RV) both can be used to give 
-// quartenion and euler (yaw, pitch roll) angles.  Toggle the FAST_MODE define to see other report.  
+// This demo explores two reports (SH2_ARVR_STABILIZED_RV and SH2_GYRO_INTEGRATED_RV) both can be used to give
+// quartenion and euler (yaw, pitch roll) angles.  Toggle the FAST_MODE define to see other report.
 // Note sensorValue.status gives calibration accuracy (which improves over time)
 
 
@@ -29,17 +29,20 @@
 // but not for I2C or UART
 #define BNO08X_RESET -1
 #define SEALEVELPRESSURE_HPA (1007)
+#define CIRCUMFERENCE 5236  //in kilofeet, assuming 10 in wheel radius
 
-// //HES
-// volatile byte half_revolutions;
-// unsigned int rpm;
-// unsigned long timeold;
- 
+//HES
+volatile byte half_revolutions;
+unsigned int spd;
+unsigned long distance;
+unsigned long timeold;
+const int hall_pin = 2;
+
 File myFile;
-char filename[] = "gudstuff.txt"; // filename (without extension) should not exceed 8 chars
+char filename[] = "gudstuff.txt";  // filename (without extension) should not exceed 8 chars
 const int chipSelect = 53;
 
-//SD.exists() function? 
+//SD.exists() function?
 
 
 unsigned long myTime;
@@ -55,20 +58,20 @@ struct euler_t {
 } ypr;
 
 #ifdef FAST_MODE
-  // Top frequency is reported to be 1000Hz (but freq is somewhat variable)
-  sh2_SensorId_t reportType = SH2_GYRO_INTEGRATED_RV;
-  long reportIntervalUs = 2000; 
+// Top frequency is reported to be 1000Hz (but freq is somewhat variable)
+sh2_SensorId_t reportType = SH2_GYRO_INTEGRATED_RV;
+long reportIntervalUs = 2000;
 #else
-  // Top frequency is about 250Hz but this report is more accurate
-  sh2_SensorId_t reportType = SH2_ARVR_STABILIZED_RV;
-  long reportIntervalUs = 5000;
+// Top frequency is about 250Hz but this report is more accurate
+sh2_SensorId_t reportType = SH2_ARVR_STABILIZED_RV;
+long reportIntervalUs = 5000;
 #endif
 
 void setup(void) {
-  
+
   Serial1.begin(9600);
-   pinMode(chipSelect, OUTPUT);
- 
+  pinMode(chipSelect, OUTPUT);
+
   if (!SD.begin(chipSelect)) {
     Serial.println("SD initialization failed!");
     return;
@@ -78,17 +81,21 @@ void setup(void) {
   myTime = millis();
 
   Serial.begin(115200);
-  
+
   while (!Serial)
-    delay(10); // will pause Zero, Leonardo, etc until serial console opens
+    delay(10);  // will pause Zero, Leonardo, etc until serial console opens
 
   Serial.println("Adafruit BNO08x/BMP388 test!");
 
-  // //HES
-  // attachInterrupt(0, magnet_detect, RISING);//Initialize the intterrupt pin (Arduino digital pin 2)
-  // half_revolutions = 0;
-  // rpm = 0;
-  // timeold = 0;
+  //HES
+  //attachInterrupt(0, magnet_detect, RISING);//Initialize the intterrupt pin (Arduino digital pin 2)
+
+  pinMode(hall_pin, INPUT);
+  half_revolutions = 0;
+
+  distance = 0;
+  timeold = 0;
+  spd = 0;
 
   // Try to initialize!
   if (!bno08x.begin_I2C()) {
@@ -99,11 +106,12 @@ void setup(void) {
       delay(10);
     }
   }
-   if (!bmp.begin_I2C()) {   // hardware I2C mode, can pass in address & alt Wire
-  //if (! bmp.begin_SPI(BMP_CS)) {  // hardware SPI mode  
-  //if (! bmp.begin_SPI(BMP_CS, BMP_SCK, BMP_MISO, BMP_MOSI)) {  // software SPI mode
+  if (!bmp.begin_I2C()) {  // hardware I2C mode, can pass in address & alt Wire
+                           //if (! bmp.begin_SPI(BMP_CS)) {  // hardware SPI mode
+                           //if (! bmp.begin_SPI(BMP_CS, BMP_SCK, BMP_MISO, BMP_MOSI)) {  // software SPI mode
     Serial.println("Could not find a valid BMP3 sensor, check wiring!");
-    while (1);
+    while (1)
+      ;
   }
   Serial.println("BNO08x Found!");
 
@@ -134,7 +142,7 @@ void setup(void) {
 // Here is where you define the sensor outputs you want to receive
 void setReports(sh2_SensorId_t reportType, long report_interval) {
   Serial.println("Setting desired reports");
- 
+
   // if (!bno08x.enableReport(SH2_ACCELEROMETER,3000)) {
   //   Serial.println("Could not enable accelerometer");
   // }
@@ -144,48 +152,47 @@ void setReports(sh2_SensorId_t reportType, long report_interval) {
   // if (!bno08x.enableReport(SH2_MAGNETIC_FIELD_CALIBRATED)) {
   //   Serial.println("Could not enable magnetic field calibrated");
   // }
-  if (!bno08x.enableReport(SH2_LINEAR_ACCELERATION,2000)) {
+  if (!bno08x.enableReport(SH2_LINEAR_ACCELERATION, 2500)) {
     Serial.println("Could not enable linear acceleration");
   }
-  if (!bno08x.enableReport(SH2_ROTATION_VECTOR,2000)) {
+  if (!bno08x.enableReport(SH2_ROTATION_VECTOR, 2500)) {
     Serial.println("Could not enable rotation vector");
   }
   //  if (! bno08x.enableReport(reportType, report_interval)) {
   //   Serial.println("Could not enable stabilized remote vector");
   // }
- 
 }
-// //HES
-//  void magnet_detect()//This function is called whenever a magnet/interrupt is detected by the arduino
-//  {
-//    half_revolutions++;
-//    Serial.println("detect");
-//  }
+//HES
+void magnet_detect()  //This function is called whenever a magnet/interrupt is detected by the arduino
+{
+  half_revolutions++;
+  Serial.println(half_revolutions);
+}
 
 void quaternionToEuler(float qr, float qi, float qj, float qk, euler_t* ypr, bool degrees = false) {
 
-    float sqr = sq(qr);
-    float sqi = sq(qi);
-    float sqj = sq(qj);
-    float sqk = sq(qk);
+  float sqr = sq(qr);
+  float sqi = sq(qi);
+  float sqj = sq(qj);
+  float sqk = sq(qk);
 
-    ypr->yaw = atan2(2.0 * (qi * qj + qk * qr), (sqi - sqj - sqk + sqr));
-    ypr->pitch = asin(-2.0 * (qi * qk - qj * qr) / (sqi + sqj + sqk + sqr));
-    ypr->roll = atan2(2.0 * (qj * qk + qi * qr), (-sqi - sqj + sqk + sqr));
+  ypr->yaw = atan2(2.0 * (qi * qj + qk * qr), (sqi - sqj - sqk + sqr));
+  ypr->pitch = asin(-2.0 * (qi * qk - qj * qr) / (sqi + sqj + sqk + sqr));
+  ypr->roll = atan2(2.0 * (qj * qk + qi * qr), (-sqi - sqj + sqk + sqr));
 
-    if (degrees) {
-      ypr->yaw *= RAD_TO_DEG;
-      ypr->pitch *= RAD_TO_DEG;
-      ypr->roll *= RAD_TO_DEG;
-    }
+  if (degrees) {
+    ypr->yaw *= RAD_TO_DEG;
+    ypr->pitch *= RAD_TO_DEG;
+    ypr->roll *= RAD_TO_DEG;
+  }
 }
 
 void quaternionToEulerRV(sh2_RotationVectorWAcc_t* rotational_vector, euler_t* ypr, bool degrees = false) {
-    quaternionToEuler(rotational_vector->real, rotational_vector->i, rotational_vector->j, rotational_vector->k, ypr, degrees);
+  quaternionToEuler(rotational_vector->real, rotational_vector->i, rotational_vector->j, rotational_vector->k, ypr, degrees);
 }
 
 void quaternionToEulerGI(sh2_GyroIntegratedRV_t* rotational_vector, euler_t* ypr, bool degrees = false) {
-    quaternionToEuler(rotational_vector->real, rotational_vector->i, rotational_vector->j, rotational_vector->k, ypr, degrees);
+  quaternionToEuler(rotational_vector->real, rotational_vector->i, rotational_vector->j, rotational_vector->k, ypr, degrees);
 }
 
 
@@ -195,11 +202,11 @@ void loop() {
   //delay(10);
 
   // make a string for assembling the data to log:
-  char dataString[280] = "";
+  char dataString[490] = "";
   // String dataString = "";
 
-  for (int i = 0; i < 4; i++) {
-   
+  for (int i = 0; i < 7; i++) {
+
     myTime = millis();
     // myFile.print("Time, ");
     // myFile.print(myTime);
@@ -228,7 +235,7 @@ void loop() {
     // }
     // //Serial.print("Time, "); Serial.print(myTime); Serial.print(" , ");
 
-    char bmpout[6] = "";
+    char bmpout[7] = "";
     dtostrf(bmp.readAltitude(SEALEVELPRESSURE_HPA), 5, 1, bmpout);
     // snprintf(bmpout, sizeof(bmpout), "\tTemp, %f, Press, %f, Alt, %f,",
     //          bmp.temperature, bmp.pressure/100, bmp.readAltitude(SEALEVELPRESSURE_HPA));
@@ -261,25 +268,19 @@ void loop() {
 
 
 
-    //  //HES
-    // if (half_revolutions >= 20) {
-    //    rpm = 30*1000/(millis() - timeold)*half_revolutions;
-    //    timeold = millis();
-    //    half_revolutions = 0;
-    //    Serial.println(rpm,DEC);
-    //  }
+
     if (bno08x.getSensorEvent(&sensorValue)) {
       // in this demo only one report type will be received depending on FAST_MODE define (above)
       switch (sensorValue.sensorId) {
 
-        // case SH2_ARVR_STABILIZED_RV:
-        //   quaternionToEulerRV(&sensorValue.un.arvrStabilizedRV, &ypr, true);
-        // case SH2_GYRO_INTEGRATED_RV:
-        //   // faster (more noise?)
-        //   quaternionToEulerGI(&sensorValue.un.gyroIntegratedRV, &ypr, true);
-        //   break;
-        // case SH2_ROTATION_VECTOR:
-        //   break;
+          // case SH2_ARVR_STABILIZED_RV:
+          //   quaternionToEulerRV(&sensorValue.un.arvrStabilizedRV, &ypr, true);
+          // case SH2_GYRO_INTEGRATED_RV:
+          //   // faster (more noise?)
+          //   quaternionToEulerGI(&sensorValue.un.gyroIntegratedRV, &ypr, true);
+          //   break;
+        case SH2_ROTATION_VECTOR:
+          break;
         case SH2_LINEAR_ACCELERATION:
           break;
       }
@@ -306,7 +307,7 @@ void loop() {
 
 
 
-      // // case SH2_ROTATION_VECTOR:
+      // case SH2_ROTATION_VECTOR:
       char rotreal[7] = "";
       char roti[7] = "";
       char rotj[7] = "";
@@ -329,7 +330,7 @@ void loop() {
       strcat(dataString, ",");
       strcat(dataString, roti);
       strcat(dataString, ",");
-      
+
       // strcat(dataString, rotstatus);
       // strcat(dataString, ",");
 
@@ -417,17 +418,45 @@ void loop() {
       // Serial.print(", ");
       // Serial.println(sensorValue.un.linearAcceleration.z);
       //   break;
-
-      // }
       strcat(dataString, "\n");
     }
   }
 
+  // // HES
+  //       char spdprint[6] = "";
+  //  char dist[10] = "";
+
+  // if (half_revolutions >= 1) {
+  //    distance += CIRCUMFERENCE;
+  //    spd = (CIRCUMFERENCE*1.0)/(millis() - timeold); //in feet per second
+  //    timeold = millis();
+  //    half_revolutions = 0;
+
+  //  }
+  //  else{
+  //    spd = 0;
+
+  //  }
+  //  snprintf(dist, sizeof(dist), "%lu",distance);
+  //    dtostrf(spd,5,2,spdprint);
+
+  //    Serial.print("Spd:");
+  //    Serial.print(spdprint);
+  //    Serial.print("Dist:");
+  //    Serial.println(distance); //in kilofeet
+
+  //   strcat(dataString, distance);
+  //   strcat(dataString, ",");
+  //   strcat(dataString, spd);
+  //   strcat(dataString, ",");
 
 
- // open the file. note that only one file can be open at a time,
-    // so you have to close this one before opening another.
-    myFile = SD.open(filename, FILE_WRITE);
+  // }
+
+
+  // open the file. note that only one file can be open at a time,
+  // so you have to close this one before opening another.
+  myFile = SD.open(filename, FILE_WRITE);
 
 
   // if the file is available, write to it:
