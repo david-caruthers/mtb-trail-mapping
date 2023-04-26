@@ -199,9 +199,7 @@ void loop() {
   // String dataString = "";
 
   for (int i = 0; i < 4; i++) {
-    // open the file. note that only one file can be open at a time,
-    // so you have to close this one before opening another.
-    myFile = SD.open(filename, FILE_WRITE);
+   
     myTime = millis();
     // myFile.print("Time, ");
     // myFile.print(myTime);
@@ -426,7 +424,9 @@ void loop() {
 
 
 
-
+ // open the file. note that only one file can be open at a time,
+    // so you have to close this one before opening another.
+    myFile = SD.open(filename, FILE_WRITE);
 
 
   // if the file is available, write to it:
@@ -435,7 +435,7 @@ void loop() {
     //myFile.write("\n");
     myFile.close();
     // print to the serial port too:
-    Serial.println(dataString);
+    //Serial.println(dataString);
     //Serial.println("\n");
   }
   // if the file isn't open, pop up an error:
