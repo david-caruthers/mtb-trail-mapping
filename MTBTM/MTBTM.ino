@@ -28,7 +28,7 @@
 //#define BNO08X_RESET 5
 // but not for I2C or UART
 #define BNO08X_RESET -1
-#define SEALEVELPRESSURE_HPA (1007)
+#define SEALEVELPRESSURE_HPA (1022)
 #define CIRCUMFERENCE 5236  //in kilofeet, assuming 10 in wheel radius
 
 //HES
@@ -326,9 +326,9 @@ void loop() {
       strcat(dataString, ",");
       strcat(dataString, roti);
       strcat(dataString, ",");
-      strcat(dataString, roti);
+      strcat(dataString, rotj);
       strcat(dataString, ",");
-      strcat(dataString, roti);
+      strcat(dataString, rotk);
       strcat(dataString, ",");
 
       // strcat(dataString, rotstatus);
