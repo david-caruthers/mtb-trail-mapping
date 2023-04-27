@@ -202,10 +202,10 @@ void loop() {
   //delay(10);
 
   // make a string for assembling the data to log:
-  char dataString[490] = "";
+  char dataString[350] = "";
   // String dataString = "";
 
-  for (int i = 0; i < 7; i++) {
+  for (int i = 0; i < 5; i++) {
 
     myTime = millis();
     // myFile.print("Time, ");
